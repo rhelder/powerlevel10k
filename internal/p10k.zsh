@@ -3338,14 +3338,16 @@ instant_prompt_status() {
 }
 
 prompt_prompt_char() {
-  local saved=$_p9k__prompt_char_saved[$_p9k__prompt_side$_p9k__segment_index$((!_p9k__status))]
+  local -i status_tmp=$_p9k__status
+  (( status_tmp == 146 )) && (( status_tmp = status_tmp - 146 ))
+  local saved=$_p9k__prompt_char_saved[$_p9k__prompt_side$_p9k__segment_index$((!status_tmp))]
   if [[ -n $saved ]]; then
     _p9k__prompt+=$saved
     return
   fi
   local -i len=$#_p9k__prompt _p9k__has_upglob
   if (( __p9k_sh_glob )); then
-    if (( _p9k__status )); then
+    if (( status_tmp )); then
       if (( _POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE )); then
         _p9k_prompt_segment $0_ERROR_VIINS "$_p9k_color1" 196 '' 0 '${${${${${${:-$_p9k__keymap.$_p9k__zle_state}:#vicmd.*}:#vivis.*}:#vivli.*}:#*.*overwrite*}}' '❯'
         _p9k_prompt_segment $0_ERROR_VIOWR "$_p9k_color1" 196 '' 0 '${${${${${${:-$_p9k__keymap.$_p9k__zle_state}:#vicmd.*}:#vivis.*}:#vivli.*}:#*.*insert*}}' '▶'
@@ -3365,7 +3367,7 @@ prompt_prompt_char() {
       _p9k_prompt_segment $0_OK_VIVIS "$_p9k_color1" 76 '' 0 '${$((! ${#${${${${:-$_p9k__keymap$_p9k__region_active}:#vicmd1}:#vivis?}:#vivli?}})):#0}' 'Ⅴ'
     fi
   else
-    if (( _p9k__status )); then
+    if (( status_tmp )); then
       if (( _POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE )); then
         _p9k_prompt_segment $0_ERROR_VIINS "$_p9k_color1" 196 '' 0 '${${:-$_p9k__keymap.$_p9k__zle_state}:#(vicmd.*|vivis.*|vivli.*|*.*overwrite*)}' '❯'
         _p9k_prompt_segment $0_ERROR_VIOWR "$_p9k_color1" 196 '' 0 '${${:-$_p9k__keymap.$_p9k__zle_state}:#(vicmd.*|vivis.*|vivli.*|*.*insert*)}' '▶'
@@ -3385,7 +3387,7 @@ prompt_prompt_char() {
       _p9k_prompt_segment $0_OK_VIVIS "$_p9k_color1" 76 '' 0 '${(M)${:-$_p9k__keymap$_p9k__region_active}:#(vicmd1|vivis?|vivli?)}' 'Ⅴ'
     fi
   fi
-  (( _p9k__has_upglob )) || _p9k__prompt_char_saved[$_p9k__prompt_side$_p9k__segment_index$((!_p9k__status))]=$_p9k__prompt[len+1,-1]
+  (( _p9k__has_upglob )) || _p9k__prompt_char_saved[$_p9k__prompt_side$_p9k__segment_index$((!status_tmp))]=$_p9k__prompt[len+1,-1]
 }
 
 instant_prompt_prompt_char() {
@@ -8587,6 +8589,13 @@ function _p9k_init_cacheable() {
     _p9k_transient_prompt+='${${P9K_CONTENT::="❯"}+}'
     _p9k_param prompt_prompt_char_OK_VIINS CONTENT_EXPANSION '${P9K_CONTENT}'
     _p9k_transient_prompt+='${:-"'$_p9k__ret'"}'
+    _p9k_transient_prompt+=$sep'%146(?'$sep
+    _p9k_color prompt_prompt_char_OK_VIINS FOREGROUND 76
+    _p9k_foreground $_p9k__ret
+    _p9k_transient_prompt+=$_p9k__ret
+    _p9k_transient_prompt+='${${P9K_CONTENT::="❯"}+}'
+    _p9k_param prompt_prompt_char_OK_VIINS CONTENT_EXPANSION '${P9K_CONTENT}'
+    _p9k_transient_prompt+='${:-"'$_p9k__ret'"}'
     _p9k_transient_prompt+=$sep
     _p9k_color prompt_prompt_char_ERROR_VIINS FOREGROUND 196
     _p9k_foreground $_p9k__ret
@@ -8594,7 +8603,7 @@ function _p9k_init_cacheable() {
     _p9k_transient_prompt+='${${P9K_CONTENT::="❯"}+}'
     _p9k_param prompt_prompt_char_ERROR_VIINS CONTENT_EXPANSION '${P9K_CONTENT}'
     _p9k_transient_prompt+='${:-"'$_p9k__ret'"}'
-    _p9k_transient_prompt+=')%b%k%f%s%u'
+    _p9k_transient_prompt+='))%b%k%f%s%u'
     _p9k_get_icon '' LEFT_SEGMENT_END_SEPARATOR
     if [[ $_p9k__ret != (| ) ]]; then
       _p9k__ret+=%b%k%f
